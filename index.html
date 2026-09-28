@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoldHEN Host</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Exo+2:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg: #03050a;
+  --panel: rgba(8, 14, 28, 0.85);
+  --gold: #f5c542;
+  --gold-bright: #ffe08a;
+  --cyan: #00f0ff;
+  --text: #e8f0ff;
+  --muted: #7a8ba3;
+  --ok: #00ff9d;
+  --danger: #ff4d6d;
+  --glow: 0 0 30px rgba(245, 197, 66, 0.25);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Exo 2', system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Background grid + ambient glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(245, 197, 66, 0.12), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.06), transparent 35%),
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Top brand */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  border: 1.5px solid var(--gold);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--gold-bright);
+  background: linear-gradient(145deg, rgba(245,197,66,0.2), rgba(255,255,255,0.03));
+  box-shadow: var(--glow), inset 0 0 20px rgba(245,197,66,0.1);
+}
+
+.brand-text {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.brand-text span {
+  color: var(--gold);
+}
+
+/* Main card */
+.hero {
+  position: relative;
+  border: 1px solid rgba(245, 197, 66, 0.25);
+  border-radius: 24px;
+  padding: 48px 40px;
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.5),
+    0 0 60px rgba(245,197,66,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  overflow: hidden;
+}
+
+/* Decorative corner accents */
+.hero::before,
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border: 1.5px solid rgba(245,197,66,0.4);
+  pointer-events: none;
+}
+.hero::before {
+  top: 12px;
+  left: 12px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 8px 0 0 0;
+}
+.hero::after {
+  bottom: 12px;
+  right: 12px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 8px 0;
+}
+
+.title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(32px, 7vw, 52px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.title span {
+  color: var(--gold-bright);
+  text-shadow: 0 0 40px rgba(245,197,66,0.35);
+}
+
+.subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+/* Loader section */
+.loader {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 28px 24px;
+}
+
+#msgs {
+  font-family: 'Exo 2', sans-serif;
+  font-weight: 600;
+  font-size: clamp(18px, 2.8vw, 24px);
+  letter-spacing: 0.03em;
+  color: var(--text);
+  margin-bottom: 20px;
+  min-height: 1.4em;
+}
+
+.progress {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-bright), transparent);
+  border-radius: 4px;
+  animation: scan 2s infinite ease-in-out;
+}
+
+@keyframes scan {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
+/* Status indicator */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 12px var(--ok);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .shell { padding: 28px 0; }
+  .hero { padding: 32px 22px; border-radius: 18px; }
+  .brand { margin-bottom: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand">
+    <div class="logo">G</div>
+    <div class="brand-text">GOLDHEN <span>HOST</span></div>
+  </div>
+
+  <main class="hero">
+    <h1 class="title">GoldHEN <span>Host</span></h1>
+    <p class="subtitle">PS4 Firmware Loader</p>
+
+    <section class="loader">
+      <div id="msgs">Loading GoldHEN v2.4b18.12... Please Wait</div>
+      <div class="progress"></div>
+    </section>
+
+    <div class="status-bar">
+      <i class="dot"></i>
+      <span>SYSTEM READY</span>
+    </div>
+  </main>
+</div>
+
+<script>
+var uaFull = navigator.userAgent;
+var match = uaFull.match(/PlayStation 4[ /]([\d.]+)/i);
+var isPS4 = match !== null;
+var fwVersion = isPS4 ? match[1] : "Unknown";
+var fwNum = parseFloat(fwVersion);
+
+function onScriptError() {
+    msgs.innerHTML = "Content not Found! - Clear Browser Data and Re-Install Cache ...";
+}
+
+if (!isPS4) {
+    document.addEventListener("DOMContentLoaded", () => {
+        msgs.innerHTML = "Only for PS4 with Firmware 5.05 and 7.00 to 13.52";
+    });
+} else {
+    if (window.applicationCache.status == '0') {
+        if (fwNum == 5.05 || fwNum == 5.07) {
+            window.location.replace("cache505.html");
+        } else if (fwNum >= 7.00 && fwNum <= 8.52) {
+            window.location.replace("cache700.html");
+        } else if (fwNum >= 9.00 && fwNum <= 9.60) {
+            window.location.replace("cache900.html");
+        } else if (fwNum >= 10.00 && fwNum <= 11.02) {
+            window.location.replace("cachecss.html");
+        } else if (fwNum >= 11.50 && fwNum <= 13.52) {
+            window.location.replace("cacheslopkit.html");
+        } else {
+            document.addEventListener("DOMContentLoaded", () => {
+                msgs.innerHTML = 'Unsupported Firmware: <span style="color: #ff4d6d;">' + fwVersion + '</span>';
+            });
+        }
+    } else {
+        if (fwNum == 5.05 || fwNum == 5.07) {
+            var script = document.createElement('script');
+            script.src = "505/exploit.js";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 7.00 && fwNum <= 8.52) {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = "700/alert.js";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 9.00 && fwNum <= 9.60) {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = "900/alert.js";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 10.00 && fwNum <= 11.02) {
+            var script = document.createElement('script');
+            script.src = "css/main.js";
+            script.onerror = onScriptError;
+            script.onload = function () {
+                setTimeout(function () {
+                    doJb();
+                }, 500);
+            };
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 11.50 && fwNum <= 12.02) {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = "slopkit/chain_lapse.js";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 12.50 && fwNum <= 13.00) {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = "slopkit/chain_poops.js";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+        else if (fwNum >= 13.02 && fwNum <= 13.52) {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = "slopkit/jb.js?v=19";
+            script.onerror = onScriptError;
+            document.head.appendChild(script);
+        }
+    }
+}
+</script>
+</body>
+</html>
